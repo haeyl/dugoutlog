@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  /* iOS-style color palette extracted from Apple Health */
-  --ios-bg: #F2F2F7;          /* iOS grouped background */
-  --ios-surface: #FFFFFF;      /* card surface */
-  --ios-primary: #FF5427;      /* activity orange (Health flame) */
+  /* Dugout Log warm palette */
+  --ios-bg: #FDF6EE;           /* warm cream background */
+  --ios-surface: #FFFCF8;      /* card surface */
+  --ios-primary: #FF5427;      /* accent orange */
   --ios-primary-soft: #FFF0EB; /* primary tint bg */
   --ios-primary-mid: #FFDDD3;  /* primary mid tint */
-  --ios-label: #1C1C1E;        /* primary text */
-  --ios-label2: #8E8E93;       /* secondary text */
-  --ios-label3: #C7C7CC;       /* tertiary text */
-  --ios-separator: #E5E5EA;    /* dividers/borders */
-  --ios-fill: #EFEFF4;         /* input/inactive fill */
-  --ios-win: #30D158;          /* iOS green */
-  --ios-lose: #FF3B30;         /* iOS red */
-  --ios-win-soft: #E8F8EE;
-  --ios-lose-soft: #FFF1F0;
+  --ios-label: #212121;        /* primary text */
+  --ios-label2: #6F6A64;       /* secondary text */
+  --ios-label3: #8A827A;       /* muted / inactive */
+  --ios-separator: #E9DED2;    /* dividers/borders */
+  --ios-fill: #EDE3D6;         /* input/inactive fill */
+  --ios-win: #06923E;          /* win green */
+  --ios-lose: #E67514;         /* loss amber */
+  --ios-win-soft: #EAF7EF;
+  --ios-lose-soft: #FFF1E6;
 }
 
 @theme inline {

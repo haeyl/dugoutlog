@@ -89,29 +89,34 @@ export default function LogDetailPage() {
           {log.opponentTeam}
         </h2>
         <p className="text-[11px] text-label2 mb-5">{log.location}</p>
-        <div className="flex items-center gap-3">
-          <span
-            className={`text-5xl font-black tracking-tight ${
+        <div className="flex items-center gap-6 mt-1">
+          <div>
+            <p className="text-[11px] text-label3 font-semibold mb-1.5 tracking-wide">예측</p>
+            <p className={`text-[42px] font-black leading-none ${
+              log.prediction === "win" ? "text-win" : "text-lose"
+            }`}>
+              {OUTCOME_LABELS[log.prediction]}
+            </p>
+          </div>
+          <div className="w-px h-12 bg-separator" />
+          <div>
+            <p className="text-[11px] text-label3 font-semibold mb-1.5 tracking-wide">실제</p>
+            <p className={`text-[42px] font-black leading-none ${
               isWin ? "text-win" : "text-lose"
-            }`}
-          >
-            {OUTCOME_LABELS[log.result]}
-          </span>
-          <span
-            className={`text-[12px] px-3 py-1.5 rounded-full font-semibold ${
-              predCorrect
-                ? "bg-win text-white"
-                : "bg-fill text-label2"
-            }`}
-          >
-            예측 {predCorrect ? "적중 ✓" : "빗나감 ✗"}
-          </span>
+            }`}>
+              {OUTCOME_LABELS[log.result]}
+            </p>
+          </div>
+          {predCorrect && (
+            <span className="ml-auto text-[11px] px-2.5 py-1 rounded-full font-semibold bg-win-soft text-win">
+              예측 적중 ✓
+            </span>
+          )}
         </div>
       </div>
 
       {/* Detail fields */}
       <div className="bg-surface rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] divide-y divide-separator mb-3 overflow-hidden">
-        <Row label="예측" value={OUTCOME_LABELS[log.prediction]} />
         <Row label="오늘의 선수" value={log.playerOfTheDay} />
         {log.expectedPlayer && (
           <Row label="기대 선수" value={log.expectedPlayer} />

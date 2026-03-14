@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, List, PlusCircle, BarChart2 } from "lucide-react";
+import { Home, PlusCircle, BarChart2 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "홈", icon: Home },
-  { href: "/logs", label: "로그", icon: List },
   { href: "/add", label: "기록", icon: PlusCircle },
   { href: "/insights", label: "인사이트", icon: BarChart2 },
 ];
@@ -23,7 +22,7 @@ export default function Navigation() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-2xl my-1.5 transition-all ${
+              className={`flex flex-col items-center gap-1 py-2.5 px-5 rounded-2xl my-1.5 transition-all ${
                 isActive ? "text-primary" : "text-label3"
               }`}
             >

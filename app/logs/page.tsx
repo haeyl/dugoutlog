@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getLogs } from "@/lib/storage";
 import { GameLog, WatchType, WATCH_TYPE_LABELS } from "@/lib/types";
 import GameLogCard from "@/components/GameLogCard";
@@ -32,7 +34,15 @@ export default function LogsPage() {
   );
 
   return (
-    <div className="px-4 pt-12 pb-28">
+    <div className="px-4 pt-6 pb-28">
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/">
+          <button className="flex items-center gap-1.5 text-primary text-sm font-semibold">
+            <ArrowLeft size={18} strokeWidth={2.5} />
+            뒤로
+          </button>
+        </Link>
+      </div>
       <div className="mb-6">
         <h1 className="text-[28px] font-black text-label tracking-tight">경기 기록</h1>
         <p className="text-[12px] text-label2 mt-1">

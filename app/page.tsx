@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PlusCircle, ChevronRight } from "lucide-react";
 import { getLogs, seedMockData } from "@/lib/storage";
 import { MOCK_LOGS } from "@/lib/mockData";
@@ -9,6 +10,7 @@ import { GameLog, WATCH_TYPE_LABELS, WatchType } from "@/lib/types";
 import GameLogCard from "@/components/GameLogCard";
 
 export default function HomePage() {
+  const router = useRouter();
   const [logs, setLogs] = useState<GameLog[]>([]);
 
   useEffect(() => {
@@ -49,9 +51,12 @@ export default function HomePage() {
         <p className="text-sm text-label2 mt-1.5">나만의 야구 직관 일기</p>
       </div>
 
-      {/* Season Stats Card — Health app style */}
+      {/* Season Stats Card */}
       {logs.length > 0 && (
-        <div className="bg-surface rounded-[20px] mb-6 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+        <div
+          className="bg-surface rounded-[20px] mb-6 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform cursor-pointer"
+          onClick={() => router.push("/insights")}
+        >
           {/* Card header */}
           <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-separator">
             <div className="flex items-center gap-2">
