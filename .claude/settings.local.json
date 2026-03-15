@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(find:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(ls:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

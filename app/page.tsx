@@ -7,6 +7,7 @@ import { PlusCircle, ChevronRight } from "lucide-react";
 import { getLogs, seedMockData } from "@/lib/storage";
 import { MOCK_LOGS } from "@/lib/mockData";
 import { GameLog, WATCH_TYPE_LABELS, WatchType } from "@/lib/types";
+import { calcPredictionStats, TIER_CONFIG } from "@/lib/prediction";
 import GameLogCard from "@/components/GameLogCard";
 
 export default function HomePage() {
@@ -20,9 +21,10 @@ export default function HomePage() {
 
   const wins = logs.filter((l) => l.result === "win").length;
   const losses = logs.filter((l) => l.result === "lose").length;
-  const predHits = logs.filter((l) => l.prediction === l.result).length;
   const winRate = logs.length > 0 ? Math.round((wins / logs.length) * 100) : 0;
-  const predRate = logs.length > 0 ? Math.round((predHits / logs.length) * 100) : 0;
+
+  const predStats = calcPredictionStats(logs);
+  const tierConfig = TIER_CONFIG[predStats.tier];
 
   const watchTypeCounts = logs.reduce<Partial<Record<WatchType, number>>>(
     (acc, l) => {
@@ -88,7 +90,7 @@ export default function HomePage() {
             <div className="px-5 py-5 border-r border-separator">
               <p className="text-[11px] font-semibold text-label2 mb-2">예측 적중</p>
               <p className="text-[40px] font-black text-primary tabular-nums leading-none">
-                {predRate}
+                {predStats.accuracy}
                 <span className="text-[22px] font-bold">%</span>
               </p>
             </div>
@@ -101,6 +103,80 @@ export default function HomePage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Prediction Performance Card */}
+      {predStats.totalCount > 0 && (
+        <div
+          className="bg-surface rounded-[20px] mb-6 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform cursor-pointer"
+          onClick={() => router.push("/insights")}
+        >
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-separator">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px]">{tierConfig.emoji}</span>
+              <p className="text-[15px] font-bold text-label">예측 성적</p>
+            </div>
+            <span
+              className={`text-[12px] font-bold px-2.5 py-1 rounded-full ${tierConfig.bgClass} ${tierConfig.textClass}`}
+            >
+              {predStats.tier}
+            </span>
+          </div>
+
+          {predStats.tier === "측정 중" ? (
+            <div className="px-5 py-5">
+              <p className="text-[13px] text-label2">
+                예측이{" "}
+                <span className="font-bold text-label">5경기</span>{" "}
+                이상 쌓이면 성적이 나타나요
+              </p>
+              <p className="text-[12px] text-label3 mt-1">
+                현재 {predStats.totalCount}경기 예측 중
+              </p>
+            </div>
+          ) : (
+            <div className="px-5 py-5">
+              <div className="flex items-end justify-between mb-4">
+                <div>
+                  <p className="text-[11px] font-semibold text-label2 mb-2">예측 적중률</p>
+                  <p className="text-[40px] font-black text-primary tabular-nums leading-none">
+                    {predStats.accuracy}
+                    <span className="text-[22px] font-bold">%</span>
+                  </p>
+                  <p className="text-[11px] text-label3 mt-1">총 {predStats.totalCount}경기 예측</p>
+                </div>
+                <div className="text-right">
+                  {predStats.currentStreak > 0 && (
+                    <p className="text-[13px] font-bold text-primary">
+                      {predStats.currentStreak}연속 적중 중
+                    </p>
+                  )}
+                  <p className="text-[11px] text-label3 mt-1">
+                    최고 {predStats.bestStreak}연속
+                  </p>
+                </div>
+              </div>
+
+              {/* Recent 5 dots */}
+              <div className="flex items-center gap-2.5 pt-3 border-t border-separator">
+                <p className="text-[11px] text-label2 shrink-0">최근 {predStats.recentFiveResults.length}경기</p>
+                <div className="flex items-center gap-1.5">
+                  {predStats.recentFiveResults.map((correct, i) => (
+                    <span
+                      key={i}
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        correct ? "bg-primary" : "bg-stone-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-[11px] font-bold text-label ml-auto">
+                  {predStats.recentFiveCorrect}적중
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -7,11 +7,13 @@ import { Home, PlusCircle, BarChart2 } from "lucide-react";
 const NAV_ITEMS = [
   { href: "/", label: "홈", icon: Home },
   { href: "/add", label: "기록", icon: PlusCircle },
-  { href: "/insights", label: "인사이트", icon: BarChart2 },
+  { href: "/insights", label: "내 덕아웃", icon: BarChart2 },
 ];
 
 export default function Navigation() {
   const pathname = usePathname();
+
+  if (pathname === "/login") return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-separator safe-bottom shadow-[0_-1px_0_rgba(0,0,0,0.08)]">
