@@ -69,8 +69,11 @@ export function getPredictionTier(
 }
 
 export function calcPredictionStats(logs: GameLog[]): PredictionStats {
+  // Only completed logs count toward prediction stats
+  const completed = logs.filter((l) => l.status === "completed" && l.result !== undefined);
+
   // Sort chronologically (oldest first) for streak calculations
-  const sorted = [...logs].sort(
+  const sorted = [...completed].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
@@ -129,17 +132,20 @@ function subsetAccuracy(logs: GameLog[]): number | null {
 }
 
 export function calcPredictionBreakdowns(logs: GameLog[]): PredictionBreakdowns {
+  // Only completed logs count toward breakdowns
+  const completed = logs.filter((l) => l.status === "completed" && l.result !== undefined);
+
   // Derive user's primary team from most frequent myTeam value
-  const teamCounts = logs.reduce<Record<string, number>>((acc, l) => {
+  const teamCounts = completed.reduce<Record<string, number>>((acc, l) => {
     acc[l.myTeam] = (acc[l.myTeam] || 0) + 1;
     return acc;
   }, {});
   const myTeam =
     Object.entries(teamCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
-  const myTeamLogs = myTeam ? logs.filter((l) => l.myTeam === myTeam) : [];
-  const stadiumLogs = logs.filter((l) => l.watchType === "stadium");
-  const homeLogs = logs.filter((l) => l.watchType === "home");
+  const myTeamLogs = myTeam ? completed.filter((l) => l.myTeam === myTeam) : [];
+  const stadiumLogs = completed.filter((l) => l.watchType === "stadium");
+  const homeLogs = completed.filter((l) => l.watchType === "home");
 
   return {
     myTeam,

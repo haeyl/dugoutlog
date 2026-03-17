@@ -35,7 +35,9 @@ export default function InsightsPage() {
     router.refresh();
   };
 
-  if (logs.length === 0) {
+  const completedLogs = logs.filter((l) => l.status === "completed");
+
+  if (completedLogs.length === 0) {
     return (
       <div className="px-4 pt-12 pb-28">
         <h1 className="text-[28px] font-black text-label tracking-tight mb-1">내 덕아웃</h1>
@@ -47,22 +49,22 @@ export default function InsightsPage() {
           </div>
           <div className="text-center">
             <p className="text-label2 text-sm font-medium">아직 인사이트가 없어요</p>
-            <p className="text-label3 text-xs mt-1">기록이 쌓이면 통계가 나타나요.</p>
+            <p className="text-label3 text-xs mt-1">경기 후 기록이 완료되면 통계가 나타나요.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  const wins = logs.filter((l) => l.result === "win").length;
-  const losses = logs.length - wins;
-  const winRate = Math.round((wins / logs.length) * 100);
+  const wins = completedLogs.filter((l) => l.result === "win").length;
+  const losses = completedLogs.length - wins;
+  const winRate = Math.round((wins / completedLogs.length) * 100);
 
   const predStats = calcPredictionStats(logs);
   const predBreakdowns = calcPredictionBreakdowns(logs);
   const tierConfig = TIER_CONFIG[predStats.tier];
 
-  const watchTypeCounts = logs.reduce<Record<WatchType, number>>(
+  const watchTypeCounts = completedLogs.reduce<Record<WatchType, number>>(
     (acc, l) => {
       acc[l.watchType] = (acc[l.watchType] || 0) + 1;
       return acc;
@@ -74,15 +76,15 @@ export default function InsightsPage() {
     .filter((wt) => watchTypeCounts[wt] > 0)
     .map((wt) => {
       const total = watchTypeCounts[wt];
-      const wtWins = logs.filter(
+      const wtWins = completedLogs.filter(
         (l) => l.watchType === wt && l.result === "win"
       ).length;
       return { wt, total, winRate: Math.round((wtWins / total) * 100) };
     })
     .sort((a, b) => b.total - a.total);
 
-  const moodCounts = logs
-    .flatMap((l) => l.moodTags)
+  const moodCounts = completedLogs
+    .flatMap((l) => l.moodTags ?? [])
     .reduce<Record<string, number>>((acc, tag) => {
       acc[tag] = (acc[tag] || 0) + 1;
       return acc;
@@ -91,8 +93,8 @@ export default function InsightsPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
 
-  const playerCounts = logs.reduce<Record<string, number>>((acc, l) => {
-    acc[l.playerOfTheDay] = (acc[l.playerOfTheDay] || 0) + 1;
+  const playerCounts = completedLogs.reduce<Record<string, number>>((acc, l) => {
+    if (l.playerOfTheDay) acc[l.playerOfTheDay] = (acc[l.playerOfTheDay] || 0) + 1;
     return acc;
   }, {});
   const topPlayers = Object.entries(playerCounts)
@@ -131,8 +133,8 @@ export default function InsightsPage() {
           </div>
           <div className="grid grid-cols-3 text-center divide-x divide-separator">
             <div className="py-5">
-              <p className="text-[34px] font-black text-label tabular-nums leading-none">{logs.length}</p>
-              <p className="text-[11px] text-label2 mt-1.5">총 경기</p>
+              <p className="text-[34px] font-black text-label tabular-nums leading-none">{completedLogs.length}</p>
+              <p className="text-[11px] text-label2 mt-1.5">완료 경기</p>
             </div>
             <div className="py-5">
               <p className="text-[34px] font-black text-win tabular-nums leading-none">{wins}</p>
@@ -194,7 +196,7 @@ export default function InsightsPage() {
                   예측이 <span className="font-bold text-label">5경기</span> 이상 쌓이면 성적이 나타나요
                 </p>
                 <p className="text-[12px] text-label3 mt-1.5">
-                  현재 {predStats.totalCount}경기 예측 중
+                  현재 {predStats.totalCount}경기 완료
                 </p>
               </div>
             ) : (
@@ -299,7 +301,7 @@ export default function InsightsPage() {
                 <div className="flex-1 h-2 bg-fill rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${(total / logs.length) * 100}%` }}
+                    style={{ width: `${(total / completedLogs.length) * 100}%` }}
                   />
                 </div>
                 <span className="text-[11px] text-label2 w-8 text-right shrink-0 tabular-nums">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "덕아웃 로그",
@@ -33,6 +34,8 @@ export default function RootLayout({
           {children}
         </div>
         <Navigation />
+        {/* figma-capture */}
+        <Script src="https://mcp.figma.com/mcp/html-to-design/capture.js" strategy="afterInteractive" />
       </body>
     </html>
   );

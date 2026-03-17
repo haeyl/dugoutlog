@@ -24,8 +24,7 @@ export default function LogDetailPage() {
 
   if (!log) return null;
 
-  const isWin = log.result === "win";
-  const predCorrect = log.prediction === log.result;
+  const isPregame = log.status === "pregame";
 
   function handleDelete() {
     if (!confirming) {
@@ -69,6 +68,73 @@ export default function LogDetailPage() {
         </div>
       )}
 
+      {isPregame ? (
+        <PregameDetail log={log} />
+      ) : (
+        <CompletedDetail log={log} />
+      )}
+
+      <p className="text-[11px] text-label3 text-center mt-8">
+        {new Date(log.createdAt).toLocaleString("ko-KR")} 기록
+      </p>
+    </div>
+  );
+}
+
+function PregameDetail({ log }: { log: GameLog }) {
+  return (
+    <>
+      {/* Game info hero */}
+      <div className="bg-surface rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] p-5 mb-3">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[11px] text-label2 tabular-nums font-medium">
+            {log.date} · {log.seasonYear}시즌
+          </p>
+          <span className="text-[11px] text-label2 bg-fill px-3 py-1 rounded-full font-medium">
+            {WATCH_TYPE_LABELS[log.watchType]}
+          </span>
+        </div>
+        <h2 className="text-[18px] font-bold text-label mb-0.5">
+          {log.myTeam}
+          <span className="text-label3 font-normal text-sm mx-1.5">vs</span>
+          {log.opponentTeam}
+        </h2>
+        <p className="text-[11px] text-label2 mb-5">{log.location}</p>
+        <div>
+          <p className="text-[11px] text-label3 font-semibold mb-1.5 tracking-wide">경기 전 예측</p>
+          <p className={`text-[42px] font-black leading-none ${
+            log.prediction === "win" ? "text-win" : "text-lose"
+          }`}>
+            {OUTCOME_LABELS[log.prediction]}
+          </p>
+        </div>
+      </div>
+
+      {/* Pending state */}
+      <div className="bg-fill rounded-[20px] p-5 mb-3 flex flex-col items-center text-center gap-2">
+        <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-xl mb-1">
+          ⏳
+        </div>
+        <p className="text-[14px] font-bold text-label">경기 후 기록이 필요해요</p>
+        <p className="text-[12px] text-label2">결과, 오늘의 선수, 감정 태그를 아직 입력하지 않았어요.</p>
+      </div>
+
+      {/* CTA */}
+      <Link href={`/logs/${log.id}/complete`}>
+        <button className="w-full bg-primary active:bg-primary/90 active:scale-[0.98] text-white font-bold py-4 rounded-[16px] text-[15px] transition-all shadow-md shadow-primary/25">
+          경기 후 기록하기
+        </button>
+      </Link>
+    </>
+  );
+}
+
+function CompletedDetail({ log }: { log: GameLog }) {
+  const isWin = log.result === "win";
+  const predCorrect = log.prediction === log.result;
+
+  return (
+    <>
       {/* Result hero */}
       <div
         className={`rounded-[20px] p-5 mb-3 ${
@@ -104,7 +170,7 @@ export default function LogDetailPage() {
             <p className={`text-[42px] font-black leading-none ${
               isWin ? "text-win" : "text-lose"
             }`}>
-              {OUTCOME_LABELS[log.result]}
+              {OUTCOME_LABELS[log.result!]}
             </p>
           </div>
           {predCorrect && (
@@ -116,15 +182,14 @@ export default function LogDetailPage() {
       </div>
 
       {/* Detail fields */}
-      <div className="bg-surface rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] divide-y divide-separator mb-3 overflow-hidden">
-        <Row label="오늘의 선수" value={log.playerOfTheDay} />
-        {log.expectedPlayer && (
-          <Row label="기대 선수" value={log.expectedPlayer} />
-        )}
-      </div>
+      {log.playerOfTheDay && (
+        <div className="bg-surface rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] divide-y divide-separator mb-3 overflow-hidden">
+          <Row label="오늘의 선수" value={log.playerOfTheDay} />
+        </div>
+      )}
 
       {/* Mood tags */}
-      {log.moodTags.length > 0 && (
+      {log.moodTags && log.moodTags.length > 0 && (
         <div className="bg-surface rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] p-5">
           <p className="text-[11px] font-bold text-label2 uppercase tracking-widest mb-3">
             감정 태그
@@ -141,11 +206,7 @@ export default function LogDetailPage() {
           </div>
         </div>
       )}
-
-      <p className="text-[11px] text-label3 text-center mt-8">
-        {new Date(log.createdAt).toLocaleString("ko-KR")} 기록
-      </p>
-    </div>
+    </>
   );
 }
 

@@ -5,7 +5,11 @@
       "Bash(find:*)",
       "Bash(npx next:*)",
       "Bash(ls:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "mcp__figma-remote-mcp__get_metadata",
+      "mcp__figma-remote-mcp__get_design_context",
+      "mcp__figma-remote-mcp__generate_figma_design",
+      "Bash(lsof:*)"
     ]
   }
 }

@@ -1,8 +1,10 @@
+export type LogStatus = "pregame" | "completed";
 export type WatchType = "stadium" | "home" | "outside" | "highlights";
 export type GameOutcome = "win" | "lose";
 
 export interface GameLog {
   id: string;
+  status: LogStatus;
   date: string;
   seasonYear: number;
   myTeam: string;
@@ -10,10 +12,10 @@ export interface GameLog {
   watchType: WatchType;
   location: string;
   prediction: GameOutcome;
-  result: GameOutcome;
-  expectedPlayer?: string;
-  playerOfTheDay: string;
-  moodTags: string[];
+  // postgame fields — only present when status === "completed"
+  result?: GameOutcome;
+  playerOfTheDay?: string;
+  moodTags?: string[];
   createdAt: string;
   updatedAt: string;
 }

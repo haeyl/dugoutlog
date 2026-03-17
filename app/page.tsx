@@ -19,14 +19,19 @@ export default function HomePage() {
     setLogs(getLogs());
   }, []);
 
-  const wins = logs.filter((l) => l.result === "win").length;
-  const losses = logs.filter((l) => l.result === "lose").length;
-  const winRate = logs.length > 0 ? Math.round((wins / logs.length) * 100) : 0;
+  const completedLogs = logs.filter((l) => l.status === "completed");
+  const pregameLogs = logs
+    .filter((l) => l.status === "pregame")
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const wins = completedLogs.filter((l) => l.result === "win").length;
+  const losses = completedLogs.filter((l) => l.result === "lose").length;
+  const winRate = completedLogs.length > 0 ? Math.round((wins / completedLogs.length) * 100) : 0;
 
   const predStats = calcPredictionStats(logs);
   const tierConfig = TIER_CONFIG[predStats.tier];
 
-  const watchTypeCounts = logs.reduce<Partial<Record<WatchType, number>>>(
+  const watchTypeCounts = completedLogs.reduce<Partial<Record<WatchType, number>>>(
     (acc, l) => {
       acc[l.watchType] = (acc[l.watchType] || 0) + 1;
       return acc;
@@ -53,8 +58,25 @@ export default function HomePage() {
         <p className="text-sm text-label2 mt-1.5">나만의 야구 직관 일기</p>
       </div>
 
+      {/* Pregame logs needing completion */}
+      {pregameLogs.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-bold text-label tracking-tight">결과 입력 대기 중</h2>
+            <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
+              {pregameLogs.length}경기
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {pregameLogs.map((log) => (
+              <GameLogCard key={log.id} log={log} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Season Stats Card */}
-      {logs.length > 0 && (
+      {completedLogs.length > 0 && (
         <div
           className="bg-surface rounded-[20px] mb-6 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] active:scale-[0.99] transition-transform cursor-pointer"
           onClick={() => router.push("/insights")}
@@ -71,9 +93,9 @@ export default function HomePage() {
           {/* Stats grid */}
           <div className="grid grid-cols-2">
             <div className="px-5 py-5 border-r border-b border-separator">
-              <p className="text-[11px] font-semibold text-label2 mb-2">총 경기</p>
+              <p className="text-[11px] font-semibold text-label2 mb-2">완료된 경기</p>
               <p className="text-[40px] font-black text-label tabular-nums leading-none">
-                {logs.length}
+                {completedLogs.length}
               </p>
               <p className="text-[11px] text-label3 mt-1">{wins}승 {losses}패</p>
             </div>
@@ -129,10 +151,10 @@ export default function HomePage() {
               <p className="text-[13px] text-label2">
                 예측이{" "}
                 <span className="font-bold text-label">5경기</span>{" "}
-                이상 쌓이면 성적이 나타나요
+                이상 완료되면 성적이 나타나요
               </p>
               <p className="text-[12px] text-label3 mt-1">
-                현재 {predStats.totalCount}경기 예측 중
+                현재 {predStats.totalCount}경기 완료
               </p>
             </div>
           ) : (

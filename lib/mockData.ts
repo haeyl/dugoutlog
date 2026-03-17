@@ -3,6 +3,7 @@ import { GameLog } from "./types";
 export const MOCK_LOGS: GameLog[] = [
   {
     id: "mock-1",
+    status: "completed",
     date: "2025-04-05",
     seasonYear: 2025,
     myTeam: "LG 트윈스",
@@ -11,7 +12,6 @@ export const MOCK_LOGS: GameLog[] = [
     location: "잠실야구장",
     prediction: "win",
     result: "win",
-    expectedPlayer: "오스틴",
     playerOfTheDay: "오스틴",
     moodTags: ["짜릿함", "뿌듯함"],
     createdAt: "2025-04-05T21:00:00.000Z",
@@ -19,6 +19,7 @@ export const MOCK_LOGS: GameLog[] = [
   },
   {
     id: "mock-2",
+    status: "completed",
     date: "2025-04-12",
     seasonYear: 2025,
     myTeam: "LG 트윈스",
@@ -34,6 +35,7 @@ export const MOCK_LOGS: GameLog[] = [
   },
   {
     id: "mock-3",
+    status: "completed",
     date: "2025-04-20",
     seasonYear: 2025,
     myTeam: "LG 트윈스",
@@ -42,7 +44,6 @@ export const MOCK_LOGS: GameLog[] = [
     location: "잠실야구장",
     prediction: "win",
     result: "win",
-    expectedPlayer: "문보경",
     playerOfTheDay: "문보경",
     moodTags: ["설렘", "행복", "감동"],
     createdAt: "2025-04-20T20:30:00.000Z",
@@ -50,6 +51,7 @@ export const MOCK_LOGS: GameLog[] = [
   },
   {
     id: "mock-4",
+    status: "completed",
     date: "2025-05-03",
     seasonYear: 2025,
     myTeam: "LG 트윈스",
@@ -65,6 +67,7 @@ export const MOCK_LOGS: GameLog[] = [
   },
   {
     id: "mock-5",
+    status: "completed",
     date: "2025-05-17",
     seasonYear: 2025,
     myTeam: "LG 트윈스",
@@ -77,5 +80,18 @@ export const MOCK_LOGS: GameLog[] = [
     moodTags: ["아쉬움", "분노"],
     createdAt: "2025-05-17T23:00:00.000Z",
     updatedAt: "2025-05-17T23:00:00.000Z",
+  },
+  {
+    id: "mock-6",
+    status: "pregame",
+    date: "2025-05-24",
+    seasonYear: 2025,
+    myTeam: "LG 트윈스",
+    opponentTeam: "KT 위즈",
+    watchType: "stadium",
+    location: "잠실야구장",
+    prediction: "win",
+    createdAt: "2025-05-24T14:00:00.000Z",
+    updatedAt: "2025-05-24T14:00:00.000Z",
   },
 ];
