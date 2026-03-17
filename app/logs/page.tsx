@@ -20,9 +20,10 @@ export default function LogsPage() {
   const [filter, setFilter] = useState<WatchType | "all">("all");
 
   useEffect(() => {
-    const all = getLogs();
-    all.sort((a, b) => b.date.localeCompare(a.date));
-    setLogs(all);
+    getLogs().then((all) => {
+      all.sort((a, b) => b.date.localeCompare(a.date));
+      setLogs(all);
+    });
   }, []);
 
   const filtered =

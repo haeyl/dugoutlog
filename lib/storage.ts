@@ -1,44 +1,124 @@
-import { GameLog } from "./types";
+import { GameLog, GameOutcome, LogStatus, WatchType } from "./types";
+import { createClient } from "./supabase/client";
 
-const STORAGE_KEY = "dugoutlog_gamelogs";
-
-export function getLogs(): GameLog[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as GameLog[];
-  } catch {
-    return [];
-  }
+// DB row shape (snake_case columns)
+interface GameLogRow {
+  id: string;
+  user_id: string;
+  status: LogStatus;
+  date: string;
+  season_year: number;
+  my_team: string;
+  opponent_team: string;
+  watch_type: WatchType;
+  location: string;
+  prediction: GameOutcome;
+  result: GameOutcome | null;
+  player_of_the_day: string | null;
+  mood_tags: string[];
+  created_at: string;
+  updated_at: string;
 }
 
-export function saveLog(log: GameLog): void {
-  const logs = getLogs();
-  const idx = logs.findIndex((l) => l.id === log.id);
-  if (idx >= 0) {
-    logs[idx] = log;
-  } else {
-    logs.unshift(log);
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+function rowToLog(row: GameLogRow): GameLog {
+  return {
+    id: row.id,
+    status: row.status,
+    date: row.date,
+    seasonYear: row.season_year,
+    myTeam: row.my_team,
+    opponentTeam: row.opponent_team,
+    watchType: row.watch_type,
+    location: row.location,
+    prediction: row.prediction,
+    result: row.result ?? undefined,
+    playerOfTheDay: row.player_of_the_day ?? undefined,
+    moodTags: row.mood_tags ?? [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
-export function deleteLog(id: string): void {
-  const logs = getLogs().filter((l) => l.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+export async function getLogs(): Promise<GameLog[]> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("game_logs")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("date", { ascending: false });
+
+  if (error || !data) return [];
+  return data.map(rowToLog);
 }
 
-export function getLogById(id: string): GameLog | undefined {
-  return getLogs().find((l) => l.id === id);
+export async function getLogById(id: string): Promise<GameLog | null> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("game_logs")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (error || !data) return null;
+  return rowToLog(data);
 }
 
-export function seedMockData(mockLogs: GameLog[]): void {
-  if (typeof window === "undefined") return;
-  const existing = localStorage.getItem(STORAGE_KEY);
-  if (!existing) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockLogs));
-  }
+export async function saveLog(log: GameLog): Promise<void> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase.from("game_logs").upsert(
+    {
+      id: log.id,
+      user_id: user.id,
+      status: log.status,
+      date: log.date,
+      season_year: log.seasonYear,
+      my_team: log.myTeam,
+      opponent_team: log.opponentTeam,
+      watch_type: log.watchType,
+      location: log.location,
+      prediction: log.prediction,
+      result: log.result ?? null,
+      player_of_the_day: log.playerOfTheDay ?? null,
+      mood_tags: log.moodTags ?? [],
+      created_at: log.createdAt,
+      updated_at: log.updatedAt,
+    },
+    { onConflict: "id" }
+  );
+
+  if (error) throw error;
+}
+
+export async function deleteLog(id: string): Promise<void> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("game_logs")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) throw error;
 }
 
 export function generateId(): string {

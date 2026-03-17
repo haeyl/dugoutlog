@@ -15,7 +15,7 @@ export default function InsightsPage() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setLogs(getLogs());
+    getLogs().then(setLogs);
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
@@ -32,7 +32,7 @@ export default function InsightsPage() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
-    router.refresh();
+    setLogs([]);
   };
 
   const completedLogs = logs.filter((l) => l.status === "completed");

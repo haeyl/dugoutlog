@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PlusCircle, ChevronRight } from "lucide-react";
-import { getLogs, seedMockData } from "@/lib/storage";
-import { MOCK_LOGS } from "@/lib/mockData";
+import { getLogs } from "@/lib/storage";
 import { GameLog, WATCH_TYPE_LABELS, WatchType } from "@/lib/types";
 import { calcPredictionStats, TIER_CONFIG } from "@/lib/prediction";
 import GameLogCard from "@/components/GameLogCard";
@@ -15,8 +14,7 @@ export default function HomePage() {
   const [logs, setLogs] = useState<GameLog[]>([]);
 
   useEffect(() => {
-    seedMockData(MOCK_LOGS);
-    setLogs(getLogs());
+    getLogs().then(setLogs);
   }, []);
 
   const completedLogs = logs.filter((l) => l.status === "completed");

@@ -14,24 +14,25 @@ export default function LogDetailPage() {
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
-    const found = getLogById(id);
-    if (!found) {
-      router.replace("/logs");
-      return;
-    }
-    setLog(found);
+    getLogById(id).then((found) => {
+      if (!found) {
+        router.replace("/logs");
+        return;
+      }
+      setLog(found);
+    });
   }, [id, router]);
 
   if (!log) return null;
 
   const isPregame = log.status === "pregame";
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirming) {
       setConfirming(true);
       return;
     }
-    deleteLog(id);
+    await deleteLog(id);
     router.replace("/logs");
   }
 

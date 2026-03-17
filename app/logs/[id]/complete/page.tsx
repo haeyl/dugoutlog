@@ -80,12 +80,13 @@ export default function CompleteLogPage() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    const found = getLogById(id);
-    if (!found || found.status === "completed") {
-      router.replace(`/logs/${id}`);
-      return;
-    }
-    setLog(found);
+    getLogById(id).then((found) => {
+      if (!found || found.status === "completed") {
+        router.replace(`/logs/${id}`);
+        return;
+      }
+      setLog(found);
+    });
   }, [id, router]);
 
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function CompleteLogPage() {
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     const errs = validate(form);
@@ -127,7 +128,7 @@ export default function CompleteLogPage() {
       moodTags: form.moodTags,
       updatedAt: now,
     };
-    saveLog(updated);
+    await saveLog(updated);
     router.push(`/logs/${id}`);
   }
 

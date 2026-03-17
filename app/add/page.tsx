@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { saveLog, getLogById, generateId } from "@/lib/storage";
+import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
 import {
   GameLog,
   WatchType,
@@ -106,22 +108,27 @@ function AddLogForm() {
   const [existingLog, setExistingLog] = useState<GameLog | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
     if (editId) {
-      const log = getLogById(editId);
-      if (log) {
-        setExistingLog(log);
-        setForm({
-          date: log.date,
-          seasonYear: log.seasonYear,
-          myTeam: log.myTeam,
-          opponentTeam: log.opponentTeam,
-          watchType: log.watchType,
-          location: log.location,
-          prediction: log.prediction,
-        });
-      }
+      getLogById(editId).then((log) => {
+        if (log) {
+          setExistingLog(log);
+          setForm({
+            date: log.date,
+            seasonYear: log.seasonYear,
+            myTeam: log.myTeam,
+            opponentTeam: log.opponentTeam,
+            watchType: log.watchType,
+            location: log.location,
+            prediction: log.prediction,
+          });
+        }
+      });
     }
   }, [editId]);
 
@@ -133,12 +140,16 @@ function AddLogForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     const errs = validate(form);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
+      return;
+    }
+    if (!user) {
+      router.push("/login");
       return;
     }
     const now = new Date().toISOString();
@@ -153,7 +164,7 @@ function AddLogForm() {
       createdAt: existingLog?.createdAt ?? now,
       updatedAt: now,
     };
-    saveLog(log);
+    await saveLog(log);
     router.push(`/logs/${log.id}`);
   }
 
