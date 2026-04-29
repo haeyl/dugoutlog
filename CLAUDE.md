@@ -1,121 +1,64 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project
 **Dugout Log (덕아웃로그)**
 
-Dugout Log is a personal baseball viewing diary.
-It helps the user record how they watched a baseball game, what they predicted before the game, what the actual result was, who stood out as the player of the day, and what emotions they felt.
-
-This is **not** a baseball stats app.
-This is **not** a live score or real-time sports data service.
-
-It is a **fan experience log** centered on:
-- watch type
-- pre-game prediction
-- post-game result
-- player of the day
-- mood tags
-
-The product should feel personal, lightweight, and polished.
+A personal KBO baseball viewing diary. Users log pregame predictions and postgame results, recording watch type, player of the day, and mood tags. This is a **fan experience log**, not a sports stats or real-time scores app.
 
 ---
 
-## Product Goal
+## Commands
 
-Build a small but usable PoC that lets a single user:
+```bash
+npm run dev      # Start development server (Next.js)
+npm run build    # Build for production
+npm run lint     # Run ESLint
+```
 
-1. add a baseball game log
-2. record how they watched the game
-3. record whether they predicted a win or loss
-4. record the actual result
-5. record player of the day
-6. record mood tags
-7. review past logs
-8. see simple season insights
-
-The goal is **not** feature breadth.
-The goal is a **clear, realistic, polished MVP**.
+No test suite is configured.
 
 ---
 
-## Core Product Principles
+## Architecture
 
-### 1. Keep it small
-This is a first PoC.
-Do not add unnecessary features unless explicitly requested.
+**Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Supabase (auth + PostgreSQL)
 
-### 2. Prioritize usability over complexity
-The app should be easy to input and pleasant to review.
+### Routing (`app/`)
+| Route | Purpose |
+|---|---|
+| `/` | Dashboard — prediction stats, win/loss record, recent logs |
+| `/login` | Google auth entry point |
+| `/add` | Pregame log form (prediction, watch type, expected player) |
+| `/logs` | All logs list |
+| `/logs/[id]` | Log detail view |
+| `/logs/[id]/complete` | Postgame completion form (result, mood tags, player of the day) |
+| `/insights` | Season analytics |
 
-### 3. Focus on fan experience, not sports data depth
-The app is about **how the user experienced the game**, not advanced baseball analytics.
+A game log has two phases: pregame (created at `/add`) and postgame (completed at `/logs/[id]/complete`). The `status` field (`"pre"` | `"post"`) tracks this.
 
-### 4. Mobile-first
-Assume the user will often log games on mobile.
+### Data Layer (`lib/`)
+- **`types.ts`** — Core types (`GameLog`, `WatchType`, `GameOutcome`, `LogStatus`) and KBO team list
+- **`storage.ts`** — Supabase CRUD: `getLogs`, `getLogById`, `saveLog`, `deleteLog`, `generateId`
+- **`prediction.ts`** — Prediction accuracy scoring and tier calculation
+- **`supabase/client.ts`** — Browser-side Supabase client
+- **`supabase/server.ts`** — Server-side Supabase client (for Server Components / Route Handlers)
 
-### 5. Clean and polished UI
-The interface should feel refined, minimal, and slightly warm.
-Avoid over-designed “sports app” clichés.
+### Auth
+`middleware.ts` handles session refresh and route protection via Supabase auth. The auth callback is at `app/auth/callback/route.ts`.
 
----
-
-## Non-Goals
-
-Do **not** add these unless explicitly requested:
-- authentication
-- backend/database
-- external baseball APIs
-- real-time scores
-- social features
-- multiplayer/couple syncing
-- image upload
-- notifications
-- advanced charts
-- memo/freeform journaling beyond current scope
-
----
-
-## MVP Scope
-
-### Must Have
-- create log
-- edit log
-- delete log
-- logs list
-- log detail page
-- dashboard/home
-- season insights
-- localStorage persistence
-
-### Fields
-Each game log should contain:
-
-#### Required
-- `date`
-- `seasonYear`
-- `myTeam`
-- `opponentTeam`
-- `watchType`
-- `location`
-- `prediction`
-- `result`
-- `playerOfTheDay`
-- `moodTags`
-
-#### Optional
-- `expectedPlayer`
-
-There is **no memo field** in this PoC.
+### Database
+Table: `game_logs` (snake_case columns). Column mapping from TypeScript camelCase to DB snake_case happens in `storage.ts`.
 
 ---
 
 ## Data Model
 
-Use TypeScript types.
-
 ```ts
 export type WatchType = "stadium" | "home" | "outside" | "highlights";
 export type GameOutcome = "win" | "lose";
+export type LogStatus = "pre" | "post";
 
 export interface GameLog {
   id: string;
@@ -126,10 +69,26 @@ export interface GameLog {
   watchType: WatchType;
   location: string;
   prediction: GameOutcome;
-  result: GameOutcome;
+  result?: GameOutcome;          // set on completion
   expectedPlayer?: string;
-  playerOfTheDay: string;
+  playerOfTheDay?: string;       // set on completion
   moodTags: string[];
+  status: LogStatus;
   createdAt: string;
   updatedAt: string;
 }
+```
+
+---
+
+## Product Principles
+
+1. **Keep it small** — PoC; don't add features unless explicitly requested.
+2. **Mobile-first** — Users log on mobile; design for small screens.
+3. **Fan experience, not analytics** — About how the user felt, not stats.
+4. **Clean, warm UI** — Minimal and refined; avoid "sports app" clichés.
+
+### Non-Goals (do not add unless explicitly requested)
+- Backend beyond Supabase, external baseball APIs, real-time scores
+- Social/multiplayer features, image upload, notifications
+- Advanced charts, memo/freeform journaling

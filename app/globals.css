@@ -1,55 +1,294 @@
 @import "tailwindcss";
 
+/*
+ * ================================================================
+ * DESIGN SYSTEM — Dugout Log
+ * ================================================================
+ *
+ * Architecture: two-layer token system
+ *
+ *   Layer 1: Primitive Palette  (:root)
+ *     Raw named values. Never used directly in components.
+ *     Provides a single source of truth for every color.
+ *
+ *   Layer 2: Semantic Tokens  (@theme inline)
+ *     Role-based aliases pointing at primitives.
+ *     These are the public API: used as Tailwind utilities in
+ *     components (bg-card, text-primary, text-accent, etc.)
+ *
+ * Adding a new color: add a primitive, then map a semantic token.
+ * Rebranding: change only the primitive values — semantics follow.
+ *
+ * ================================================================
+ */
+
+
+/* ----------------------------------------------------------------
+   LAYER 1 — PRIMITIVE PALETTE
+   ---------------------------------------------------------------- */
 :root {
-  /* Dugout Log warm palette */
-  --ios-bg: #FDF6EE;           /* warm cream background */
-  --ios-surface: #FFFCF8;      /* card surface */
-  --ios-primary: #FF5427;      /* accent orange */
-  --ios-primary-soft: #FFF0EB; /* primary tint bg */
-  --ios-primary-mid: #FFDDD3;  /* primary mid tint */
-  --ios-label: #212121;        /* primary text */
-  --ios-label2: #6F6A64;       /* secondary text */
-  --ios-label3: #8A827A;       /* muted / inactive */
-  --ios-separator: #E9DED2;    /* dividers/borders */
-  --ios-fill: #EDE3D6;         /* input/inactive fill */
-  --ios-win: #06923E;          /* win green */
-  --ios-lose: #E67514;         /* loss amber */
-  --ios-win-soft: #EAF7EF;
-  --ios-lose-soft: #FFF1E6;
+
+  /* Brand (warm orange-red) */
+  --p-brand-600: #FF5427;
+  --p-brand-100: #FFF0EB;
+  --p-brand-50:  #FFDDD3;
+
+  /* Positive (green — win) */
+  --p-green-600: #06923E;
+  --p-green-100: #EAF7EF;
+
+  /* Negative (amber — lose) */
+  --p-amber-600: #E67514;
+  --p-amber-500: #E17100;
+  --p-amber-100: #FFF1E6;
+  --p-amber-50:  #FFFBEB;
+
+  /* Neutral (warm-toned grays) */
+  --p-neutral-900: #212121;
+  --p-neutral-700: #6F6A64;
+  --p-neutral-500: #8A827A;
+  --p-neutral-300: #E7E5E4;
+  --p-neutral-200: #E9DED2;
+  --p-neutral-150: #EDE3D6;
+  --p-neutral-50:  #FDF6EE;
+  --p-neutral-25:  #FFFCF8;
 }
 
+
+/* ----------------------------------------------------------------
+   LAYER 2 — SEMANTIC TOKENS + TAILWIND INTEGRATION
+   @theme inline exposes each token as a Tailwind color utility.
+
+   Utility naming follows the token name, e.g.:
+     --color-card        →  bg-card
+     --color-primary     →  text-primary
+     --color-accent      →  bg-accent, text-accent, border-accent
+     --color-positive    →  bg-positive, text-positive
+   ---------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--ios-bg);
-  --color-surface: var(--ios-surface);
-  --color-primary: var(--ios-primary);
-  --color-primary-soft: var(--ios-primary-soft);
-  --color-primary-mid: var(--ios-primary-mid);
-  --color-label: var(--ios-label);
-  --color-label2: var(--ios-label2);
-  --color-label3: var(--ios-label3);
-  --color-separator: var(--ios-separator);
-  --color-fill: var(--ios-fill);
-  --color-win: var(--ios-win);
-  --color-lose: var(--ios-lose);
-  --color-win-soft: var(--ios-win-soft);
-  --color-lose-soft: var(--ios-lose-soft);
+
+  /* --- Surfaces --- */
+  --color-page:  var(--p-neutral-50);   /* screen / page background     */
+  --color-card:  var(--p-neutral-25);   /* card / elevated surface      */
+  --color-inset: var(--p-neutral-150);  /* inset fill, progress tracks  */
+
+  /* --- Text --- */
+  --color-primary:   var(--p-neutral-900);  /* headings, key values     */
+  --color-secondary: var(--p-neutral-700);  /* labels, subtitles, meta  */
+  --color-tertiary:  var(--p-neutral-500);  /* muted, placeholder text  */
+  --color-inverse:   #FFFFFF;               /* text on solid fills      */
+
+  /* --- Borders --- */
+  --color-border:          var(--p-neutral-200);  /* dividers, card outlines    */
+  --color-border-inactive: var(--p-neutral-300);  /* inactive chips, dots       */
+
+  /* --- Accent (brand / interactive) ---
+     Use accent for: CTAs, links, active states, brand emphasis.
+     accent-subtle: ghost button bg, tag bg
+     accent-muted:  hover state, secondary tint
+  */
+  --color-accent:        var(--p-brand-600);
+  --color-accent-subtle: var(--p-brand-100);
+  --color-accent-muted:  var(--p-brand-50);
+
+  /* --- Outcome: Positive (win) ---
+     positive:        solid fill — result badges, left accent bar
+     positive-subtle: ghost fill — prediction badges
+  */
+  --color-positive:        var(--p-green-600);
+  --color-positive-subtle: var(--p-green-100);
+
+  /* --- Outcome: Negative (lose) ---
+     negative:        solid fill — result badges, left accent bar
+     negative-subtle: ghost fill — prediction badges
+  */
+  --color-negative:        var(--p-amber-600);
+  --color-negative-subtle: var(--p-amber-100);
+
+  /* --- Tier (prediction grade badge) ---
+     tier:        badge text color
+     tier-subtle: badge background color
+  */
+  --color-tier:        var(--p-amber-500);
+  --color-tier-subtle: var(--p-amber-50);
 }
 
+
+/* ----------------------------------------------------------------
+   TYPOGRAPHY SCALE
+   Named by role, not by size. Use these in components.
+
+   Family
+     Korean-first stack: Pretendard > system-ui > Noto Sans KR
+     Weights: regular(400), medium(500), semibold(600), bold(700), black(900)
+
+   Scale (simplified from 10 raw sizes → 8 named roles)
+     label       11px  — stat labels, mood tags, meta, dates in card
+     caption     12px  — filter chips, badge text, nav links
+     body-sm     13px  — row labels, sub-section headers
+     body        14px  — default body, subtitles, "vs" separator
+     body-lg     15px  — card section titles, matchup team names
+     heading     28px  — inner-page H1s (logs, insights)
+     heading-lg  32px  — home hero title only (intentional hierarchy)
+     stat-sm     34px  — compact 3-column stat display
+     stat        40px  — primary stat display (win rate, prediction %)
+
+   Resolved inconsistency:
+     17px was used once (featured location name in Insights). Removed;
+     map to body-lg (15px bold) going forward.
+
+   Compound patterns (not standalone tokens):
+     stat % suffix  →  22px bold on a 40px/34px baseline (inline span)
+     streak label   →  22px bold + 14px body inline
+   ---------------------------------------------------------------- */
+:root {
+  --text-label:      11px;
+  --text-caption:    12px;
+  --text-body-sm:    13px;
+  --text-body:       14px;
+  --text-body-lg:    15px;
+  --text-heading:    28px;
+  --text-heading-lg: 32px;
+  --text-stat-sm:    34px;
+  --text-stat:       40px;
+
+  --font-regular:  400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+  --font-black:    900;
+
+  --tracking-tight:  -0.8px;  /* heading-lg only */
+  --tracking-snug:   -0.7px;  /* heading */
+  --tracking-normal:  0px;
+  --tracking-wide:    1.2px;  /* season label (uppercase) */
+}
+
+
+/* ----------------------------------------------------------------
+   SPACING SCALE
+   4px base. All values are multiples or documented exceptions.
+
+   Full steps  →  use freely
+   Half steps  →  use only where visual output requires it
+
+   --space-1    4px   gap-xs, icon padding
+   --space-2    8px   gap between badge elements, stat gap
+   --space-3    12px  gap between cards in a list
+   --space-4    16px  card inner top padding
+   --space-5    20px  card horizontal padding (primary)
+   --space-6    24px  section/page level top padding
+
+   Half-step exceptions (preserved for visual fidelity):
+   --space-1h   6px   dot row gaps, small tag gaps
+   --space-2h   10px  tag horizontal padding
+   --space-3h   14px  breakdown row spacing
+   ---------------------------------------------------------------- */
+:root {
+  --space-1:  4px;
+  --space-1h: 6px;
+  --space-2:  8px;
+  --space-2h: 10px;
+  --space-3:  12px;
+  --space-3h: 14px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+}
+
+
+/* ----------------------------------------------------------------
+   SHAPE + ELEVATION
+   ---------------------------------------------------------------- */
+:root {
+  --radius-sm:   12px;    /* inner stat tiles (Insights)   */
+  --radius-md:   20px;    /* section cards (all screens)   */
+  --radius-full: 9999px;  /* pills: buttons, badges, tags  */
+
+  /* Resolved inconsistency: three progress bar heights unified
+     into two by purpose (layout bar vs. inline metric bar).     */
+  --bar-sm: 6px;   /* inline metric bars (breakdown rows, win rate) */
+  --bar-md: 10px;  /* full-width win/loss summary bar               */
+
+  --shadow-card: 0px 2px 12px 0px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ----------------------------------------------------------------
+   COMPONENT PATTERNS
+   Reference for consistent component construction.
+
+   CARD
+     Surface: bg-card, radius-md, shadow-card, overflow-hidden
+     Header:  h-auto px-5 py-3.5, border-b border-border
+              Left: icon + body-lg bold text-primary
+              Right: optional trailing element
+     Body:    px-5, pt-4
+
+   BADGE (outcome pill)
+     Base: h-7 px-2 rounded-full flex items-center justify-center
+           text-caption font-black
+     Positive solid:  bg-positive  text-inverse
+     Positive ghost:  bg-positive-subtle  text-positive
+     Negative solid:  bg-negative  text-inverse
+     Negative ghost:  bg-negative-subtle  text-negative
+
+   TAG (mood pill / filter chip)
+     Mood tag:     bg-accent-subtle text-accent  text-label font-medium
+                   h-[20.5px] rounded-full px-2h
+     Filter chip active:   bg-accent text-inverse  text-caption font-semibold
+                           h-[30px] rounded-full px-3
+     Filter chip inactive: bg-card border border-border text-secondary
+                           text-caption font-semibold h-[30px] rounded-full px-3
+
+   TIER BADGE
+     bg-tier-subtle text-tier  text-caption font-bold
+     h-[26px] rounded-full px-2h
+
+   STAT CELL (inside a 2×2 grid section)
+     Label:    text-label font-semibold text-secondary
+     Value:    text-stat font-black text-{contextual}
+     Sub-label: text-label font-regular text-tertiary
+
+   PROGRESS BAR
+     Track: bg-inset rounded-full h-bar-sm (or h-bar-md)
+     Fill:  bg-{accent|positive|negative} rounded-full
+
+   LEFT ACCENT BAR (GameLogCard)
+     w-1 h-full bg-positive (win) | bg-negative (lose)
+
+   BREAKDOWN ROW
+     flex items-center justify-between gap-2
+     Label: text-body-sm font-medium text-primary  w-14
+     Bar:   flex-1 progress bar (bar-sm)
+     Value: text-body-sm font-bold text-accent  w-10 text-right
+
+   STREAK DOTS
+     flex gap-1h
+     Each: size-[10px] rounded-full
+     Hit:  bg-accent
+     Miss: bg-border-inactive
+   ---------------------------------------------------------------- */
+
+
+/* ----------------------------------------------------------------
+   BASE STYLES
+   ---------------------------------------------------------------- */
 body {
-  background: var(--ios-bg);
-  color: var(--ios-label);
+  background: var(--p-neutral-50);
+  color: var(--p-neutral-900);
   font-family: -apple-system, BlinkMacSystemFont, system-ui,
     "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .no-scrollbar::-webkit-scrollbar {
